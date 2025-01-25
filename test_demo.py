@@ -106,10 +106,11 @@ def run(rank, size, model_name, batch_size, data_path, output_file):
 
 if __name__ == "__main__":
     # Initialize distributed training
-    print("debut de l'initialisation")
+    print(f"Initializing process group on rank {os.environ.get('RANK', 'undefined')}...")
     dist.init_process_group("gloo", init_method="env://")
     size = dist.get_world_size()
     rank = dist.get_rank()
+    print(f"Process group initialized: rank {rank}/{size}")
     print("fin de l'initialisation")
 
     # Parameters (can be modified dynamically)
