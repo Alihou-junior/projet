@@ -105,6 +105,13 @@ def run(rank, size, model_name, batch_size, data_path, output_file):
     print(f"Finished running DDP training on rank {rank}.")
 
 if __name__ == "__main__":
+    # Initialize distributed training
+    print(f"Initializing process group on rank {os.environ.get('RANK', 'undefined')}...")
+    dist.init_process_group("gloo", init_method="env://")
+    size = dist.get_world_size()
+    rank = dist.get_rank()
+    print(f"Process group initialized: rank {rank}/{size}")
+    print("fin de l'initialisation")
 
     # Parameters (can be modified dynamically)
     model_name = "resnet34"  # Change to others as needed
@@ -112,23 +119,12 @@ if __name__ == "__main__":
     data_path = "/data/neo/user/chxu/"  # Update to your dataset path
     output_file = "timing_results.txt"  # File to save the timing results
 
-    
+    print("ouverture et ecriture dans le fichier")
+    # Ensure the output file is cleared before writing new results (only on rank 0)
+    if rank == 0 and os.path.exists(output_file):
+        open(output_file, "w").close()
+
+    print("fin fichier")
     # Run the training process 5 times for each batch size
     for batch_size in batch_sizes:
-        # Initialize distributed training
-        print(f"Initializing process group on rank {os.environ.get('RANK', 'undefined')}...")
-        dist.init_process_group("gloo", init_method="env://")
-        size = dist.get_world_size()
-        rank = dist.get_rank()
-        print(f"Process group initialized: rank {rank}/{size}")
-        print("fin de l'initialisation")
-
-        print("ouverture et ecriture dans le fichier")
-        # Ensure the output file is cleared before writing new results (only on rank 0)
-        if rank == 0 and os.path.exists(output_file):
-            open(output_file, "w").close()
-
-        print("fin fichier")
-
-        for _ in range(5):  # Effectue 5 tests pour chaque cas  
-            run(rank, size, model_name, batch_size, data_path, output_file)
+        run(rank, size, model_name, batch_size, data_path, output_file)
