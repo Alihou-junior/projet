@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     # Parameters (can be modified dynamically)
     model_name = "resnet34"  # Change to others as needed
-    batch_sizes = [16, 32, 64, 128]  # Change to 16, 64, 128 for tests
+    batch_size = 16  # Change to 16, 64, 128 for tests
     data_path = "/data/neo/user/chxu/"  # Update to your dataset path
     output_file = "timing_results.txt"  # File to save the timing results
 
@@ -126,5 +126,5 @@ if __name__ == "__main__":
 
     print("fin fichier")
     # Run the training process 5 times for each batch size
-    for batch_size in batch_sizes:
+    for _ in range(5):  # Effectue 5 tests pour chaque cas
         run(rank, size, model_name, batch_size, data_path, output_file)
