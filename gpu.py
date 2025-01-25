@@ -37,7 +37,7 @@ def save_results(rank, num_devices, batch_size, load_time, compute_time):
 
 def run(rank, size, model_name, batch_size):
     # Set device for current rank (GPU)
-    device = torch.device(f'cuda:{rank}' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(f'cuda:{rank % torch.cuda.device_count()}' if torch.cuda.is_available() else 'cpu')
 
     transform_train = transforms.Compose([
         transforms.RandomResizedCrop(224),
@@ -54,7 +54,7 @@ def run(rank, size, model_name, batch_size):
     dataloader = DataLoader(local_dataset, batch_size=sample_size, shuffle=True)
     
     model = get_model(model_name, len(dataset.classes), device)  # Move model to device
-    ddp_model = DDP(model, device_ids=[rank])  # Specify GPU for DDP
+    ddp_model = DDP(model, device_ids=[rank % torch.cuda.device_count()])  # Specify GPU for DDP
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.SGD(ddp_model.parameters(), lr=0.001)
 
@@ -81,6 +81,7 @@ def run(rank, size, model_name, batch_size):
     
     dist.destroy_process_group()
     print(f"Finished running DDP example on rank {rank}.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
